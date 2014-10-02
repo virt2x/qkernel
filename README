@@ -1,0 +1,47 @@
+                          * TPM2.0 Linux enabling *
+                          Quan Xu <quan.xu@intel.com>
+Introduction:
+	Trusted Platform Module (TPM) is an international standard for a secure cryptoprocessor, 
+which is a dedicated microprocessor designed to secure hardware by integrating cryptographic 
+keys into device [1]. TPM 2.0 is used in this document to refer to the next version of the 
+Trusted Computing Group TPM specification. This patch is enabling for Linux to communicate with 
+TPM 2.0 hardware or TPM 2.0 simulator. 
+
+[Kernel Interfaces]:
+I define 6 new kernel interfaces in /sys/class/misc/tpm0/device, Such as endorseauth, ownerauth, 
+pcrs, phenable, shenable, ehenable.
+
+*endorseauth:
+0: endorsementAuth has not been changed since TPM2_Clear().
+1: TPM2_HierarchyChangeAuth() with endorsementAuth has been executed since the last TPM2_Clear().
+
+*ownerauth:
+1: TPM2_HierarchyChangeAuth() with ownerAuth has been executed since the last TPM2_Clear().
+0: ownerAuth has not been changed since TPM2_Clear().
+
+*pcrs:
+All digest values of PCR with sha1 algorithm.
+
+*phenable:
+1: The platform hierarchy is enabled and platformAuth or platformPolicy may be used for authorization.
+0: platformAuth and platformPolicy may not be used for authorizations, and objects in the platform 
+   hierarchy, including NV Indexes and persistent objects, cannot be used.
+
+*shenable:
+1: The Storage hierarchy is enabled and ownerAuth or ownerPolicy may be used for authorization.
+0: ownerAuth and ownerPolicy may not be used for authorizations, and objects in the Storage hierarchy,
+   including NV Indexes and persistent objects, cannot be used. 
+
+*ehenable:
+1:  The EPS hierarchy is enabled and endorsementAuth may be used to authorize commands.
+0:  endorsementAuth and endorsementPolicy may not be used for authorizations, and objects in the 
+    endorsement hierarchy, including persistent objects, cannot be used.
+
+[Patch enabling]:
+This patch is based on Linux 3.9.1. Configure the patched Linux kernel source code with following 
+setup steps and modprobe tpm2_tis.
+Device Drivers --- >
+	Character devices --- >
+		[*]	TPM Hardware Support --- >
+			<M>   TPM Interface Specification 2.0 Interface
+
